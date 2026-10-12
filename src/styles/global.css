@@ -371,6 +371,10 @@ a:focus-visible {
   line-height: 1.5;
 }
 
+.empty-state .secondary-button {
+  margin-top: var(--space-4);
+}
+
 .about-grid {
   display: grid;
   gap: var(--space-3);

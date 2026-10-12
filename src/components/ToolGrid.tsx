@@ -8,6 +8,10 @@ interface ToolGridProps {
   onToggleFavorite: (toolId: ToolDefinition["id"]) => void;
   emptyTitle: string;
   emptyDescription: string;
+  emptyAction?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 export function ToolGrid({
@@ -17,12 +21,24 @@ export function ToolGrid({
   onToggleFavorite,
   emptyTitle,
   emptyDescription,
+  emptyAction,
 }: ToolGridProps) {
   if (tools.length === 0) {
     return (
-      <div className="empty-state" role="status">
-        <h2>{emptyTitle}</h2>
-        <p>{emptyDescription}</p>
+      <div className="empty-state">
+        <div role="status">
+          <h2>{emptyTitle}</h2>
+          <p>{emptyDescription}</p>
+        </div>
+        {emptyAction && (
+          <button
+            className="secondary-button"
+            onClick={emptyAction.onClick}
+            type="button"
+          >
+            {emptyAction.label}
+          </button>
+        )}
       </div>
     );
   }

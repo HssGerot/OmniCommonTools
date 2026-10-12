@@ -27,6 +27,10 @@ export function HomePage() {
   const recentTools = recent
     .map((entry) => TOOLS.find((tool) => tool.id === entry.toolId))
     .filter((tool) => tool !== undefined);
+  const clearFilters = () => {
+    setQuery("");
+    setCategory("all");
+  };
 
   return (
     <main className="catalog-page" id="main-content">
@@ -85,6 +89,10 @@ export function HomePage() {
           <span>{filteredTools.length} 项</span>
         </div>
         <ToolGrid
+          emptyAction={{
+            label: "清除筛选",
+            onClick: clearFilters,
+          }}
           emptyDescription="请调整关键词或选择其他分类。"
           emptyTitle="没有匹配的工具"
           favorites={favorites}
