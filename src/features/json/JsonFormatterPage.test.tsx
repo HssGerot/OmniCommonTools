@@ -145,7 +145,6 @@ it("formats, copies, clears, and keeps the last successful output on error", asy
   await user.click(screen.getByRole("button", { name: "复制结果" }));
   expect(writeText).toHaveBeenCalledWith(expect.stringContaining("9007199254740993"));
 
-  await user.clear(input);
   fireEvent.change(input, { target: { value: '{"id":' } });
 
   const alert = await screen.findByRole("alert");
@@ -163,6 +162,21 @@ it("formats, copies, clears, and keeps the last successful output on error", asy
   expect(output).toHaveValue("");
 });
 
+it("automatically formats valid JSON after input changes", async () => {
+  renderJsonPage();
+
+  fireEvent.change(screen.getByLabelText("JSON 输入"), {
+    target: { value: '{"id":9007199254740993,"ok":true}' },
+  });
+
+  await waitFor(() => {
+    expect(screen.getByLabelText("JSON 结果")).toHaveValue(
+      '{\n  "id": 9007199254740993,\n  "ok": true\n}',
+    );
+  });
+  expect(screen.getByText("已格式化")).toBeInTheDocument();
+});
+
 it("minifies, loads a sample, downloads locally, and saves only preferences", async () => {
   const user = userEvent.setup();
   const { storage } = renderJsonPage();
@@ -174,7 +188,6 @@ it("minifies, loads a sample, downloads locally, and saves only preferences", as
   });
   vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
 
-  await user.selectOptions(screen.getByLabelText("缩进"), "4");
   await user.click(screen.getByRole("checkbox", { name: "排序对象键" }));
   await user.click(screen.getByRole("button", { name: "载入示例" }));
   await user.click(screen.getByRole("button", { name: "压缩" }));
@@ -189,7 +202,6 @@ it("minifies, loads a sample, downloads locally, and saves only preferences", as
 
   const persisted = JSON.parse(storage.getItem(STORAGE_KEY)!);
   expect(persisted.settings).toEqual({
-    jsonIndent: 4,
     jsonSortKeys: true,
   });
   expect(JSON.stringify(persisted)).not.toContain(outputValue);

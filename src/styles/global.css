@@ -1073,6 +1073,18 @@ input:focus-visible,
   min-height: clamp(17rem, 36vh, 26rem);
 }
 
+.diff-input-pane .monaco-editor .diff-input-line-removed {
+  background: color-mix(in oklch, #c4322c 14%, transparent);
+}
+
+.diff-input-pane .monaco-editor .diff-input-line-added {
+  background: color-mix(in oklch, #16835b 14%, transparent);
+}
+
+.diff-input-pane .monaco-editor .diff-input-line-modified {
+  background: color-mix(in oklch, #e0a100 18%, transparent);
+}
+
 .diff-import-button {
   position: absolute;
   z-index: 2;

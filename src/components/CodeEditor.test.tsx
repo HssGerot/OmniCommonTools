@@ -8,10 +8,16 @@ import { ResolvedThemeProvider } from "./ResolvedTheme";
 vi.mock("./configureMonaco", () => ({}));
 
 const monaco = vi.hoisted(() => ({
+  createDecorationsCollection: vi.fn(() => ({
+    clear: vi.fn(),
+    set: vi.fn(),
+  })),
   focus: vi.fn(),
+  onDidScrollChange: vi.fn(() => ({ dispose: vi.fn() })),
   options: undefined as Record<string, unknown> | undefined,
   revealPositionInCenter: vi.fn(),
   setPosition: vi.fn(),
+  setScrollTop: vi.fn(),
   theme: undefined as string | undefined,
 }));
 

@@ -19,7 +19,7 @@ test("favorites, recent tools, theme, and settings persist", async ({ page }) =>
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
   await page.getByRole("link", { name: /JSON 美化/ }).click();
-  await page.getByLabel("缩进").selectOption("4");
+  await page.getByRole("checkbox", { name: "排序对象键" }).check();
   await page.getByRole("link", { name: "返回全部工具" }).click();
   await page.reload();
 
@@ -30,7 +30,7 @@ test("favorites, recent tools, theme, and settings persist", async ({ page }) =>
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
   await page.getByRole("link", { name: /JSON 美化/ }).first().click();
-  await expect(page.getByLabel("缩进")).toHaveValue("4");
+  await expect(page.getByRole("checkbox", { name: "排序对象键" })).toBeChecked();
 });
 
 test("persisted and system theme changes update Monaco editors", async ({

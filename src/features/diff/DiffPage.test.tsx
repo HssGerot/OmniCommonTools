@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { ComponentProps } from "react";
+import { forwardRef, useImperativeHandle, type ComponentProps } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, expect, it, vi } from "vitest";
 import {
@@ -31,25 +31,44 @@ const monaco = vi.hoisted(() => {
   };
 });
 
+const codeEditors = vi.hoisted(() => ({
+  handles: new Map<string, { setScrollTop: ReturnType<typeof vi.fn> }>(),
+  props: vi.fn(),
+}));
+
 vi.mock("../../components/CodeEditor", () => ({
-  CodeEditor: ({
-    label,
-    onChange,
-    readOnly,
-    value,
-  }: {
-    label: string;
-    onChange?: (value: string) => void;
-    readOnly?: boolean;
-    value: string;
-  }) => (
-    <textarea
-      aria-label={label}
-      onChange={(event) => onChange?.(event.target.value)}
-      readOnly={readOnly}
-      value={value}
-    />
-  ),
+  CodeEditor: forwardRef(function CodeEditor(
+    {
+      decorations,
+      label,
+      onChange,
+      onScrollTopChange,
+      readOnly,
+      value,
+    }: {
+      decorations?: unknown[];
+      label: string;
+      onChange?: (value: string) => void;
+      onScrollTopChange?: (scrollTop: number) => void;
+      readOnly?: boolean;
+      value: string;
+    },
+    ref,
+  ) {
+    const handle = { setScrollTop: vi.fn() };
+    codeEditors.handles.set(label, handle);
+    codeEditors.props({ decorations, label, onScrollTopChange, value });
+    useImperativeHandle(ref, () => handle);
+
+    return (
+      <textarea
+        aria-label={label}
+        onChange={(event) => onChange?.(event.target.value)}
+        readOnly={readOnly}
+        value={value}
+      />
+    );
+  }),
 }));
 
 vi.mock("@monaco-editor/react", () => ({
@@ -104,6 +123,8 @@ beforeEach(() => {
   monaco.originalEditor.revealLineInCenter.mockClear();
   monaco.originalEditor.setPosition.mockClear();
   monaco.props.mockClear();
+  codeEditors.handles.clear();
+  codeEditors.props.mockClear();
   Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
     configurable: true,
     value: vi.fn(),
@@ -116,6 +137,66 @@ beforeEach(() => {
       removeEventListener: vi.fn(),
     }),
   });
+});
+
+it("synchronizes A and B editor scroll positions in side-by-side view", async () => {
+  const user = userEvent.setup();
+  renderDiffPage();
+
+  fireEvent.change(screen.getByLabelText("A 侧内容"), {
+    target: { value: "line 1\nline 2\nline 3" },
+  });
+  fireEvent.change(screen.getByLabelText("B 侧内容"), {
+    target: { value: "line 1\nline x\nline 3" },
+  });
+  await user.click(screen.getByRole("button", { name: "开始对比" }));
+
+  const leftProps = codeEditors.props.mock.calls
+    .map(([props]) => props)
+    .find((props) => props.label === "A 侧内容");
+  leftProps.onScrollTopChange(120);
+
+  expect(codeEditors.handles.get("B 侧内容")?.setScrollTop).toHaveBeenCalledWith(
+    120,
+  );
+});
+
+it("adds side-specific line highlight decorations to changed input rows", async () => {
+  const user = userEvent.setup();
+  renderDiffPage();
+
+  fireEvent.change(screen.getByLabelText("A 侧内容"), {
+    target: { value: "same\nold" },
+  });
+  fireEvent.change(screen.getByLabelText("B 侧内容"), {
+    target: { value: "same\nnew" },
+  });
+  await user.click(screen.getByRole("button", { name: "开始对比" }));
+
+  const calls = codeEditors.props.mock.calls.map(([props]) => props);
+  const leftProps = [...calls]
+    .reverse()
+    .find((props) => props.label === "A 侧内容");
+  const rightProps = [...calls]
+    .reverse()
+    .find((props) => props.label === "B 侧内容");
+
+  expect(leftProps.decorations).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        lineNumber: 2,
+        className: "diff-input-line-modified",
+      }),
+    ]),
+  );
+  expect(rightProps.decorations).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        lineNumber: 2,
+        className: "diff-input-line-modified",
+      }),
+    ]),
+  );
 });
 
 it("marks Diff as recent and renders the shared tool context", async () => {

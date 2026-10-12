@@ -14,7 +14,11 @@ import {
   useState,
   type ChangeEvent,
 } from "react";
-import { CodeEditor } from "../../components/CodeEditor";
+import {
+  CodeEditor,
+  type CodeEditorDecoration,
+  type CodeEditorHandle,
+} from "../../components/CodeEditor";
 import { useMonacoTheme } from "../../components/ResolvedTheme";
 import { ToolPageHeader } from "../../components/ToolPageHeader";
 import { readTextFile } from "../../utils/files";
@@ -79,6 +83,46 @@ function revealLineFor(
   editor.setPosition({ lineNumber: line, column: 1 });
 }
 
+function buildInputDecorations(
+  result: DiffResult | null,
+  side: Side,
+  view: DiffView,
+): CodeEditorDecoration[] {
+  if (!result || view !== "side-by-side") {
+    return [];
+  }
+
+  return result.changes.flatMap((change) => {
+    if (side === "A") {
+      if (change.kind === "added" || change.leftLine === undefined) {
+        return [];
+      }
+      return [
+        {
+          className:
+            change.kind === "removed"
+              ? "diff-input-line-removed"
+              : "diff-input-line-modified",
+          lineNumber: change.leftLine,
+        },
+      ];
+    }
+
+    if (change.kind === "removed" || change.rightLine === undefined) {
+      return [];
+    }
+    return [
+      {
+        className:
+          change.kind === "added"
+            ? "diff-input-line-added"
+            : "diff-input-line-modified",
+        lineNumber: change.rightLine,
+      },
+    ];
+  });
+}
+
 export default function DiffPage({ preferenceStore }: DiffPageProps) {
   const preferences = usePreferences(preferenceStore);
   const monacoTheme = useMonacoTheme();
@@ -93,10 +137,13 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
   const [view, setView] = useState<DiffView>(() =>
     initialView(preferences.settings.diffView),
   );
+  const leftEditorRef = useRef<CodeEditorHandle>(null);
+  const rightEditorRef = useRef<CodeEditorHandle>(null);
   const diffEditorRef = useRef<Parameters<DiffOnMount>[0] | null>(null);
   const unifiedLineRefs = useRef(new Map<number, HTMLDivElement>());
   const leftFileRef = useRef<HTMLInputElement>(null);
   const rightFileRef = useRef<HTMLInputElement>(null);
+  const syncScrollRef = useRef(false);
   const ignoreWhitespace =
     preferences.settings.diffIgnoreWhitespace ?? false;
   const ignoreCase = preferences.settings.diffIgnoreCase ?? false;
@@ -244,8 +291,23 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
     );
   }
 
+  function syncInputScroll(source: Side, scrollTop: number) {
+    if (syncScrollRef.current || view !== "side-by-side") {
+      return;
+    }
+
+    syncScrollRef.current = true;
+    const target = source === "A" ? rightEditorRef.current : leftEditorRef.current;
+    target?.setScrollTop(scrollTop);
+    window.requestAnimationFrame(() => {
+      syncScrollRef.current = false;
+    });
+  }
+
   const total = result ? differenceCount(result) : 0;
   const language = mode === "json" ? "json" : "plaintext";
+  const leftDecorations = buildInputDecorations(result, "A", view);
+  const rightDecorations = buildInputDecorations(result, "B", view);
   const unifiedRows = result
     ? buildUnifiedDiff(result.leftRender, result.rightRender, result.changes)
     : [];
@@ -371,9 +433,12 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
             />
           </label>
           <CodeEditor
+            ref={leftEditorRef}
+            decorations={leftDecorations}
             label="A 侧内容"
             language={language}
             onChange={(value) => updateInput("A", value)}
+            onScrollTopChange={(scrollTop) => syncInputScroll("A", scrollTop)}
             value={left}
           />
         </div>
@@ -390,9 +455,12 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
             />
           </label>
           <CodeEditor
+            ref={rightEditorRef}
+            decorations={rightDecorations}
             label="B 侧内容"
             language={language}
             onChange={(value) => updateInput("B", value)}
+            onScrollTopChange={(scrollTop) => syncInputScroll("B", scrollTop)}
             value={right}
           />
         </div>

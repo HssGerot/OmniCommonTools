@@ -22,7 +22,6 @@ import {
   formatJson,
   minifyJson,
   type JsonFailure,
-  type JsonIndent,
   type JsonResult,
 } from "./jsonEngine";
 
@@ -58,7 +57,6 @@ export default function JsonFormatterPage({
   const [status, setStatus] = useState("等待输入");
   const inputEditorRef = useRef<CodeEditorHandle>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const indent = preferences.settings.jsonIndent ?? 2;
   const sortKeys = preferences.settings.jsonSortKeys ?? false;
 
   useEffect(() => {
@@ -67,16 +65,18 @@ export default function JsonFormatterPage({
 
   useEffect(() => {
     if (!input) {
+      setOutput("");
       setError(null);
       setStatus("等待输入");
       return;
     }
 
     const timeout = window.setTimeout(() => {
-      const result = minifyJson(input, false);
+      const result = formatJson(input, 2, sortKeys);
       if (result.ok) {
+        setOutput(result.value);
         setError(null);
-        setStatus("JSON 有效");
+        setStatus("已格式化");
       } else {
         setError(resultError(result));
         setStatus("JSON 无效");
@@ -84,7 +84,7 @@ export default function JsonFormatterPage({
     }, 250);
 
     return () => window.clearTimeout(timeout);
-  }, [input]);
+  }, [input, sortKeys]);
 
   function applyResult(result: JsonResult, successStatus: string) {
     if (result.ok) {
@@ -99,7 +99,7 @@ export default function JsonFormatterPage({
   }
 
   function handleFormat() {
-    applyResult(formatJson(input, indent, sortKeys), "已格式化");
+    applyResult(formatJson(input, 2, sortKeys), "已格式化");
   }
 
   function handleMinify() {
@@ -153,13 +153,6 @@ export default function JsonFormatterPage({
     } finally {
       event.target.value = "";
     }
-  }
-
-  function handleIndentChange(event: ChangeEvent<HTMLSelectElement>) {
-    const value = event.target.value;
-    const nextIndent: JsonIndent =
-      value === "tab" ? "tab" : value === "4" ? 4 : 2;
-    preferences.setSetting("jsonIndent", nextIndent);
   }
 
   function focusError() {
@@ -236,18 +229,6 @@ export default function JsonFormatterPage({
             </button>
           </div>
           <div className="json-options">
-            <label>
-              <span>缩进</span>
-              <select
-                aria-label="缩进"
-                onChange={handleIndentChange}
-                value={String(indent)}
-              >
-                <option value="2">2 空格</option>
-                <option value="4">4 空格</option>
-                <option value="tab">Tab</option>
-              </select>
-            </label>
             <label className="checkbox-label">
               <input
                 checked={sortKeys}
