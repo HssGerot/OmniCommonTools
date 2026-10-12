@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   Braces,
   Clock3,
+  CodeXml,
   GitCompareArrows,
   ShieldCheck,
   Star,
@@ -25,6 +26,7 @@ const TOOL_ICONS = {
   "json-formatter": Braces,
   "text-json-diff": GitCompareArrows,
   "timestamp-converter": Clock3,
+  codec: CodeXml,
 } satisfies Record<ToolDefinition["id"], typeof Braces>;
 
 export function ToolPageHeader({

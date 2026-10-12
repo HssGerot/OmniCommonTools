@@ -6,10 +6,7 @@ import { TOOLS } from "../features/catalog/tools";
 import type { ToolCategoryFilter } from "../features/catalog/types";
 import { usePreferences } from "../features/preferences/usePreferences";
 
-const CATEGORIES: ReadonlyArray<{
-  id: ToolCategoryFilter;
-  label: string;
-}> = [
+const CATEGORIES: ReadonlyArray<{ id: ToolCategoryFilter; label: string }> = [
   { id: "all", label: "全部" },
   { id: "format", label: "格式化" },
   { id: "diff", label: "文本对比" },
@@ -39,7 +36,7 @@ export function HomePage() {
         <h1>开发者在线工具箱</h1>
         <p>
           提供 JSON 格式化与校验、文本和 JSON 差异对比、Unix
-          时间戳转换等常用开发工具。所有输入均在浏览器本地处理。
+          时间戳转换、信息编解码等常用开发工具。所有输入均在浏览器本地处理。
         </p>
       </header>
 

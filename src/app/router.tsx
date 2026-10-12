@@ -14,6 +14,7 @@ const TextJsonDiffPage = lazy(
 const TimestampConverterPage = lazy(
   () => import("../features/time/TimeConverterPage"),
 );
+const CodecPage = lazy(() => import("../features/codec/CodecPage"));
 const AboutPage = lazy(() => import("../pages/AboutPage"));
 
 function RootLayout() {
@@ -45,6 +46,7 @@ export const router = createBrowserRouter([
         path: "tools/timestamp-converter",
         element: <TimestampConverterPage />,
       },
+      { path: "tools/codec", element: <CodecPage /> },
       { path: "about", element: <AboutPage /> },
     ],
   },

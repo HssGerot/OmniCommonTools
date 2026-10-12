@@ -1,6 +1,7 @@
 import {
   Braces,
   Clock3,
+  CodeXml,
   GitCompareArrows,
   Star,
 } from "lucide-react";
@@ -25,6 +26,7 @@ const TOOL_ICONS = {
   "json-formatter": Braces,
   "text-json-diff": GitCompareArrows,
   "timestamp-converter": Clock3,
+  codec: CodeXml,
 } satisfies Record<ToolDefinition["id"], typeof Braces>;
 
 export function ToolCard({
