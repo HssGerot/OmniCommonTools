@@ -1196,3 +1196,360 @@ input:focus-visible {
     min-height: 2.75rem;
   }
 }
+
+.time-tool-page {
+  width: min(100% - 2rem, var(--content-width));
+  margin: 0 auto;
+  padding: var(--space-8) 0;
+}
+
+.time-clock-panel,
+.time-settings,
+.time-converter-card,
+.time-results {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+}
+
+.time-clock-panel,
+.time-results {
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+}
+
+.time-section-heading,
+.time-card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.time-section-heading h2,
+.time-card-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.time-kicker {
+  margin: 0 0 var(--space-1);
+  color: var(--color-accent-strong);
+  font-size: 0.6875rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.time-current-grid,
+.time-results-grid {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+.time-current-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.time-result-field,
+.time-input-field,
+.time-settings label {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.time-result-control {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-background);
+}
+
+.time-result-control:focus-within {
+  border-color: var(--color-focus);
+}
+
+.time-result-control input,
+.time-input-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.75rem;
+  border: 0;
+  padding: 0 var(--space-3);
+  background: transparent;
+  color: var(--color-text);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-result-control input:focus-visible,
+.time-input-field input:focus-visible {
+  outline-offset: -2px;
+}
+
+.time-result-control .icon-button {
+  width: 2.75rem;
+  height: 2.75rem;
+  flex: 0 0 auto;
+}
+
+.time-settings {
+  display: flex;
+  align-items: end;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  padding: var(--space-4) var(--space-6);
+}
+
+.time-settings label {
+  flex: 0 1 24rem;
+}
+
+.time-settings select {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  padding: 0 var(--space-3);
+  background: var(--color-background);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.time-settings>span {
+  padding-bottom: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.time-converter-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.time-converter-card {
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+.time-card-heading .secondary-button {
+  white-space: nowrap;
+}
+
+.time-input-field {
+  margin-top: var(--space-6);
+}
+
+.time-input-field input {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  background: var(--color-background);
+  font-size: 0.875rem;
+}
+
+.time-input-field input[aria-invalid="true"] {
+  border-color: color-mix(in oklch, #c4322c 55%, var(--color-border));
+}
+
+.time-input-field input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.time-input-hint {
+  margin: var(--space-2) 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.time-unit-fieldset,
+.time-overlap-options {
+  min-width: 0;
+  margin: var(--space-4) 0 0;
+  border: 0;
+  padding: 0;
+}
+
+.time-unit-fieldset legend,
+.time-overlap-options legend {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.time-segmented {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  padding: 2px;
+  background: var(--color-background);
+}
+
+.time-segmented label {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.time-segmented input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.time-segmented span {
+  display: inline-flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: calc(var(--radius-small) - 2px);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.time-segmented input:checked+span {
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--color-text) 10%, transparent);
+  color: var(--color-accent-strong);
+}
+
+.time-segmented input:focus-visible+span {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.time-alert {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  border: 1px solid color-mix(in oklch, #c4322c 45%, var(--color-border));
+  border-radius: var(--radius-small);
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in oklch, #c4322c 8%, var(--color-surface));
+  color: var(--color-text);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.time-alert.is-ambiguous {
+  border-color: color-mix(in oklch, #b26b00 45%, var(--color-border));
+  background: color-mix(in oklch, #b26b00 8%, var(--color-surface));
+}
+
+.time-alert>span {
+  color: var(--color-text-muted);
+}
+
+.time-overlap-options {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.time-overlap-options legend {
+  float: left;
+  margin: 0 var(--space-4) 0 0;
+}
+
+.time-overlap-options label {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-overlap-options input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--color-accent);
+}
+
+.time-section-heading>span {
+  min-height: 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.time-results-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 56rem) {
+  .time-current-grid,
+  .time-converter-grid,
+  .time-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .time-settings {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .time-settings label {
+    flex-basis: auto;
+  }
+
+  .time-settings>span {
+    padding-bottom: 0;
+  }
+}
+
+@media (max-width: 40rem) {
+  .time-tool-page {
+    padding-top: var(--space-6);
+  }
+
+  .time-clock-panel,
+  .time-converter-card,
+  .time-results {
+    padding: var(--space-4);
+  }
+
+  .time-settings {
+    padding: var(--space-4);
+  }
+
+  .time-section-heading,
+  .time-card-heading {
+    flex-direction: column;
+  }
+
+  .time-section-heading .secondary-button,
+  .time-card-heading .secondary-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .time-overlap-options {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .time-overlap-options legend {
+    float: none;
+    margin-right: 0;
+  }
+}

@@ -2,20 +2,6 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { AppShell } from "../components/AppShell";
 
-function createPlaceholder(title: string, description: string) {
-  return lazy(async () => ({
-    default: function Placeholder() {
-      return (
-        <main className="page" id="main-content">
-          <p className="page-eyebrow">Toolbox</p>
-          <h1>{title}</h1>
-          <p>{description}</p>
-        </main>
-      );
-    },
-  }));
-}
-
 const HomePage = lazy(() => import("../pages/HomePage"));
 const FavoritesPage = lazy(() => import("../pages/FavoritesPage"));
 const JsonFormatterPage = lazy(
@@ -24,9 +10,8 @@ const JsonFormatterPage = lazy(
 const TextJsonDiffPage = lazy(
   () => import("../features/diff/DiffPage"),
 );
-const TimestampConverterPage = createPlaceholder(
-  "时间戳转换",
-  "在时间戳、日期时间和时区之间转换。",
+const TimestampConverterPage = lazy(
+  () => import("../features/time/TimeConverterPage"),
 );
 const AboutPage = lazy(() => import("../pages/AboutPage"));
 
