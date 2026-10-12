@@ -8,10 +8,11 @@ The MVP tools are:
 - JSON formatter
 - Text / JSON Diff
 - Timestamp converter
+- Information codec
 
 All user inputs and generated results must stay in browser memory. Do not persist
 JSON text, Diff text, imported file contents, timestamps entered by the user, or
-conversion results.
+codec input, or conversion results.
 
 Allowed persisted data:
 
@@ -54,6 +55,7 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/Ma
   - JSON: `src/features/json/jsonEngine.ts`
   - Diff: `src/features/diff`
   - Time: `src/features/time/timeEngine.ts`
+  - Codec: `src/features/codec/codecEngine.ts`
 
 ## Implementation Rules
 
@@ -74,6 +76,8 @@ PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH="/Applications/Google Chrome.app/Contents/Ma
 - Diff input panes synchronize vertical scrolling in side-by-side view.
 - Diff highlights changed rows inside the A/B input editors while typing, using
   a short debounce. The Compare button remains for immediate comparison.
+- Codec methods are shown in a compact two-column picker. Codec conversion runs
+  automatically after input changes and still keeps the manual Convert button.
 
 ## Testing Guidance
 
