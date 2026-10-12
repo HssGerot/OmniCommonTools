@@ -72,6 +72,14 @@ test("mobile pages have no horizontal document overflow and use touch targets", 
 
   for (const path of CORE_ROUTES) {
     await page.goto(path);
+    if (path === "/tools/json-formatter") {
+      const input = page.getByRole("region", { name: "JSON 输入" });
+      await input.locator(".monaco-editor").click({ position: { x: 120, y: 80 } });
+      await page.keyboard.press("ControlOrMeta+A");
+      await page.keyboard.insertText("true\nfalse");
+      await page.getByRole("button", { name: "格式化" }).click();
+      await expect(page.locator(".json-error-details summary")).toBeVisible();
+    }
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -79,7 +87,7 @@ test("mobile pages have no horizontal document overflow and use touch targets", 
       path,
     ).toBe(true);
 
-    const undersized = await page.locator("button, a, select, .file-button").evaluateAll(
+    const undersized = await page.locator("button, a, select, summary, .file-button").evaluateAll(
       (elements) =>
         elements
           .filter((element) => {

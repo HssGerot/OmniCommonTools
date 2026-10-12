@@ -165,7 +165,6 @@ export default function JsonFormatterPage({
   function focusError() {
     if (error?.line && error.column) {
       inputEditorRef.current?.focusPosition(error.line, error.column);
-      setStatus(`已定位到第 ${error.line} 行，第 ${error.column} 列`);
     }
   }
 

@@ -157,7 +157,6 @@ it("formats, copies, clears, and keeps the last successful output on error", asy
   await user.click(screen.getByRole("button", { name: "定位到错误" }));
   expect(input).toHaveFocus();
   expect(codeEditor.focusPosition).toHaveBeenCalledWith(1, 7);
-  expect(screen.getByText("已定位到第 1 行，第 7 列")).toBeVisible();
 
   await user.click(screen.getByRole("button", { name: "清空" }));
   expect(input).toHaveValue("");

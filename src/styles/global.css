@@ -962,6 +962,11 @@ input:focus-visible,
     width: 100%;
   }
 
+  .json-error-details summary {
+    min-height: 2.75rem;
+    padding: var(--space-2) 0;
+  }
+
   .json-status-bar > span:last-child {
     min-width: 0;
     text-align: left;

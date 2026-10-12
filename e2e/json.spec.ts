@@ -40,7 +40,12 @@ test("formats lossless JSON and announces copy and download", async ({ page }) =
 });
 
 test("reports and focuses the exact malformed JSON location", async ({ page }) => {
-  const input = page.getByRole("textbox", { name: "JSON 输入" });
+  const inputRegion = page.getByRole("region", { name: "JSON 输入" });
+  const input = inputRegion.getByRole("textbox", {
+    name: "JSON 输入",
+    exact: true,
+  });
+  const sentinel = "__MONACO_SELECTION_SENTINEL__";
   await replaceEditorText(page, "true\nfalse");
   await page.getByRole("button", { name: "格式化" }).click();
 
@@ -49,7 +54,12 @@ test("reports and focuses the exact malformed JSON location", async ({ page }) =
   await page.getByText(/第 2 行，第 1 列/).click();
   await page.getByRole("button", { name: "定位到错误" }).click();
   await expect(input).toBeFocused();
-  await expect(page.getByText("已定位到第 2 行，第 1 列")).toBeVisible();
+  await page.keyboard.insertText(sentinel);
+  await expect(inputRegion.locator(".view-line").nth(1)).toContainText(
+    `${sentinel}false`,
+  );
+  await page.keyboard.press("ControlOrMeta+Z");
+  await expect(inputRegion.locator(".view-lines")).not.toContainText(sentinel);
 });
 
 test("editor content does not return after reload", async ({ page }) => {
