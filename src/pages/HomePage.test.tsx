@@ -24,7 +24,7 @@ it("describes the toolbox with search-focused homepage copy", () => {
   ).toBeVisible();
   expect(
     screen.getByText(
-      "提供 JSON 格式化与校验、文本和 JSON 差异对比、Unix 时间戳转换等常用开发工具。所有输入均在浏览器本地处理。",
+      "提供 JSON 格式化与校验、文本和 JSON 差异对比、Unix 时间戳转换、信息编解码等常用开发工具。所有输入均在浏览器本地处理。",
     ),
   ).toBeVisible();
 });
@@ -73,4 +73,5 @@ it("clears search and category filters from the empty state", async () => {
     screen.getByRole("link", { name: /文本 \/ JSON Diff/ }),
   ).toBeVisible();
   expect(screen.getByRole("link", { name: /时间戳转换/ })).toBeVisible();
+  expect(screen.getByRole("link", { name: /信息编解码/ })).toBeVisible();
 });

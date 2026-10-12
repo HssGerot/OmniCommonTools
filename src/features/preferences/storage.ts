@@ -42,6 +42,7 @@ const TOOL_IDS: readonly ToolId[] = [
   "json-formatter",
   "text-json-diff",
   "timestamp-converter",
+  "codec",
 ];
 
 const DEFAULT_PREFERENCES: PersistedPreferences = {
