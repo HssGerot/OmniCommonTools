@@ -1059,6 +1059,11 @@ input:focus-visible {
   background: color-mix(in oklch, #16835b 10%, var(--color-surface));
 }
 
+.diff-line[aria-current="true"] {
+  box-shadow: inset 3px 0 var(--color-accent);
+  outline: none;
+}
+
 .diff-line-marker {
   display: inline-block;
   width: 2.5rem;

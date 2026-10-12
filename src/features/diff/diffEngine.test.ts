@@ -48,10 +48,75 @@ describe("text diff engine", () => {
 
     expect(forward.summary).toEqual({ added: 0, removed: 0, modified: 2 });
     expect(forward.changes).toEqual([
-      { kind: "modified", path: "第 2 行" },
-      { kind: "modified", path: "第 3 行" },
+      {
+        kind: "modified",
+        leftLine: 2,
+        path: "第 2 行",
+        rightLine: 2,
+      },
+      {
+        kind: "modified",
+        leftLine: 3,
+        path: "第 3 行",
+        rightLine: 3,
+      },
     ]);
     expect(reversed.summary).toEqual({ added: 0, removed: 1, modified: 0 });
+  });
+
+  it("treats empty documents as having no virtual line", () => {
+    const added = compareText("", "x", {
+      ignoreWhitespace: false,
+      ignoreCase: false,
+    });
+    const removed = compareText("x", "", {
+      ignoreWhitespace: false,
+      ignoreCase: false,
+    });
+
+    expect(added.summary).toEqual({ added: 1, removed: 0, modified: 0 });
+    expect(added.changes).toEqual([
+      expect.objectContaining({
+        kind: "added",
+        leftLine: undefined,
+        rightLine: 1,
+      }),
+    ]);
+    expect(removed.summary).toEqual({ added: 0, removed: 1, modified: 0 });
+    expect(removed.changes).toEqual([
+      expect.objectContaining({
+        kind: "removed",
+        leftLine: 1,
+        rightLine: undefined,
+      }),
+    ]);
+    expect(
+      compareText("", "", {
+        ignoreWhitespace: false,
+        ignoreCase: false,
+      }).summary,
+    ).toEqual({ added: 0, removed: 0, modified: 0 });
+  });
+
+  it("does not count a trailing newline as a virtual empty-line change", () => {
+    expect(
+      compareText("", "x\n", {
+        ignoreWhitespace: false,
+        ignoreCase: false,
+      }).summary,
+    ).toEqual({ added: 1, removed: 0, modified: 0 });
+    expect(
+      compareText("x\n", "", {
+        ignoreWhitespace: false,
+        ignoreCase: false,
+      }).summary,
+    ).toEqual({ added: 0, removed: 1, modified: 0 });
+    expect(
+      compareText("x", "x\n", {
+        ignoreWhitespace: false,
+        ignoreCase: false,
+      }).summary,
+    ).toEqual({ added: 0, removed: 0, modified: 0 });
   });
 
   it("builds a unified line view with word-level replacement markers", () => {
@@ -123,6 +188,51 @@ describe("JSON diff engine", () => {
     expect(compareJson("[1,2]", "[1,2,3]")).toMatchObject({
       summary: { added: 1, removed: 0, modified: 0 },
       changes: [{ kind: "added", path: "$[2]" }],
+    });
+  });
+
+  it("provides exact formatted lines for arrays, repeated keys, and deletions", () => {
+    expect(compareJson("[1,2]", "[1,2,3]")).toMatchObject({
+      changes: [
+        {
+          kind: "added",
+          path: "$[2]",
+          leftLine: undefined,
+          rightLine: 4,
+        },
+      ],
+    });
+
+    expect(
+      compareJson(
+        '{"left":{"id":1},"right":{"id":2}}',
+        '{"left":{"id":1},"right":{"id":3}}',
+      ),
+    ).toMatchObject({
+      changes: [
+        {
+          kind: "modified",
+          path: "$.right.id",
+          leftLine: 6,
+          rightLine: 6,
+        },
+      ],
+    });
+
+    expect(
+      compareJson(
+        '{"nested":{"gone":1,"keep":2}}',
+        '{"nested":{"keep":2}}',
+      ),
+    ).toMatchObject({
+      changes: [
+        {
+          kind: "removed",
+          path: "$.nested.gone",
+          leftLine: 3,
+          rightLine: undefined,
+        },
+      ],
     });
   });
 

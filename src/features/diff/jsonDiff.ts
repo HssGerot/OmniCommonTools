@@ -43,20 +43,6 @@ function parseSide(source: string, side: JsonFailure["side"]) {
   }
 }
 
-function canonicalize(value: unknown): unknown {
-  if (Array.isArray(value)) {
-    return value.map(canonicalize);
-  }
-  if (value && typeof value === "object" && !isLosslessNumber(value)) {
-    return Object.fromEntries(
-      Object.entries(value as Record<string, unknown>)
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([key, child]) => [key, canonicalize(child)]),
-    );
-  }
-  return value;
-}
-
 function valueType(value: unknown) {
   if (value === null) {
     return "null";
@@ -74,6 +60,63 @@ function childPath(path: string, key: string) {
   return /^[A-Za-z_$][\w$]*$/.test(key)
     ? `${path}.${key}`
     : `${path}[${JSON.stringify(key)}]`;
+}
+
+interface FormattedJson {
+  display: string;
+  locations: Map<string, number>;
+}
+
+function formatJson(value: unknown): FormattedJson {
+  const lines: string[] = [];
+  const locations = new Map<string, number>();
+
+  function write(
+    current: unknown,
+    path: string,
+    indent: number,
+    prefix = "",
+  ) {
+    const padding = " ".repeat(indent);
+    locations.set(path, lines.length + 1);
+
+    if (Array.isArray(current)) {
+      lines.push(`${padding}${prefix}[`);
+      current.forEach((child, index) => {
+        write(child, `${path}[${index}]`, indent + 2);
+        if (index < current.length - 1) {
+          lines[lines.length - 1] += ",";
+        }
+      });
+      lines.push(`${padding}]`);
+      return;
+    }
+
+    if (current && typeof current === "object" && !isLosslessNumber(current)) {
+      const entries = Object.entries(current as Record<string, unknown>).sort(
+        ([left], [right]) => left.localeCompare(right),
+      );
+      lines.push(`${padding}${prefix}{`);
+      entries.forEach(([key, child], index) => {
+        write(
+          child,
+          childPath(path, key),
+          indent + 2,
+          `${JSON.stringify(key)}: `,
+        );
+        if (index < entries.length - 1) {
+          lines[lines.length - 1] += ",";
+        }
+      });
+      lines.push(`${padding}}`);
+      return;
+    }
+
+    lines.push(`${padding}${prefix}${stringify(current) ?? "null"}`);
+  }
+
+  write(value, "$", 0);
+  return { display: lines.join("\n"), locations };
 }
 
 function recordChange(
@@ -166,12 +209,21 @@ export function compareJson(
   const summary: DiffSummary = { added: 0, removed: 0, modified: 0 };
   const changes: DiffChange[] = [];
   compareValue(parsedLeft.value, parsedRight.value, "$", changes, summary);
+  const formattedLeft = formatJson(parsedLeft.value);
+  const formattedRight = formatJson(parsedRight.value);
+  const locatedChanges = changes.map((change) => ({
+    ...change,
+    leftLine: formattedLeft.locations.get(change.path),
+    rightLine: formattedRight.locations.get(change.path),
+  }));
 
   return {
-    leftDisplay: stringify(canonicalize(parsedLeft.value), undefined, 2) ?? "",
-    rightDisplay: stringify(canonicalize(parsedRight.value), undefined, 2) ?? "",
+    changes: locatedChanges,
+    leftDisplay: formattedLeft.display,
+    leftRender: formattedLeft.display,
+    rightDisplay: formattedRight.display,
+    rightRender: formattedRight.display,
     summary,
-    changes,
   };
 }
 

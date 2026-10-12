@@ -64,21 +64,15 @@ function revealLineFor(
     return;
   }
 
-  const textLine = change.path.match(/第 (\d+) 行/)?.[1];
-  let line = textLine ? Number(textLine) : 1;
-  if (!textLine) {
-    const key = change.path.match(/\.([A-Za-z_$][\w$]*)$/)?.[1];
-    if (key) {
-      const displayLines = result.rightDisplay.split("\n");
-      const keyLine = displayLines.findIndex((value) =>
-        value.includes(`"${key}"`),
-      );
-      line = keyLine >= 0 ? keyLine + 1 : 1;
-    }
-  }
-
   const editor =
     change.kind === "removed" ? mount.getOriginalEditor() : mount.getModifiedEditor();
+  const line =
+    change.kind === "removed"
+      ? change.leftLine
+      : change.rightLine ?? change.leftLine;
+  if (line === undefined) {
+    return;
+  }
   editor.revealLineInCenter(line);
   editor.setPosition({ lineNumber: line, column: 1 });
 }
@@ -97,6 +91,7 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
     initialView(preferences.settings.diffView),
   );
   const diffEditorRef = useRef<Parameters<DiffOnMount>[0] | null>(null);
+  const unifiedLineRefs = useRef(new Map<number, HTMLDivElement>());
   const leftFileRef = useRef<HTMLInputElement>(null);
   const rightFileRef = useRef<HTMLInputElement>(null);
   const ignoreWhitespace =
@@ -108,10 +103,19 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
   }, [preferences.markRecent]);
 
   useEffect(() => {
-    if (result && diffEditorRef.current) {
-      revealLineFor(result, currentDifference, diffEditorRef.current);
+    if (!result) {
+      return;
     }
-  }, [currentDifference, result]);
+    if (view === "side-by-side" && diffEditorRef.current) {
+      revealLineFor(result, currentDifference, diffEditorRef.current);
+      return;
+    }
+    if (view === "unified") {
+      const line = unifiedLineRefs.current.get(currentDifference);
+      line?.scrollIntoView({ block: "center" });
+      line?.focus();
+    }
+  }, [currentDifference, result, view]);
 
   function calculate(
     leftValue = left,
@@ -227,7 +231,7 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
   const total = result ? differenceCount(result) : 0;
   const language = mode === "json" ? "json" : "plaintext";
   const unifiedRows = result
-    ? buildUnifiedDiff(result.leftDisplay, result.rightDisplay)
+    ? buildUnifiedDiff(result.leftRender, result.rightRender, result.changes)
     : [];
   const errorLocation =
     error && "line" in error
@@ -427,7 +431,7 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
             <DiffEditor
               height="100%"
               language={language}
-              modified={result.rightDisplay}
+              modified={result.rightRender}
               onMount={(instance) => {
                 diffEditorRef.current = instance;
                 revealLineFor(result, currentDifference, instance);
@@ -437,10 +441,12 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
                 fontSize: 13,
                 minimap: { enabled: false },
                 readOnly: true,
+                ignoreTrimWhitespace: false,
                 renderSideBySide: true,
                 scrollBeyondLastLine: false,
+                useInlineViewWhenSpaceIsLimited: false,
               }}
-              original={result.leftDisplay}
+              original={result.leftRender}
               theme={
                 document.documentElement.dataset.theme === "dark"
                   ? "vs-dark"
@@ -465,8 +471,23 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
                 <div className="diff-unified-lines">
                   {unifiedRows.map((row, rowIndex) => (
                     <div
+                      aria-current={
+                        row.changeIndex === currentDifference ? "true" : undefined
+                      }
                       className={`diff-line is-${row.kind}`}
+                      data-change-index={row.changeIndex}
                       key={`${row.kind}-${rowIndex}`}
+                      ref={(element) => {
+                        if (row.changeIndex === undefined) {
+                          return;
+                        }
+                        if (element) {
+                          unifiedLineRefs.current.set(row.changeIndex, element);
+                        } else {
+                          unifiedLineRefs.current.delete(row.changeIndex);
+                        }
+                      }}
+                      tabIndex={row.changeIndex === undefined ? undefined : -1}
                     >
                       <span className="diff-line-marker" aria-hidden="true">
                         {row.kind === "removed"

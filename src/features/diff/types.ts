@@ -9,11 +9,15 @@ export interface DiffSummary {
 export interface DiffChange {
   kind: DiffChangeKind;
   path: string;
+  leftLine?: number;
+  rightLine?: number;
 }
 
 export interface DiffResult {
   leftDisplay: string;
   rightDisplay: string;
+  leftRender: string;
+  rightRender: string;
   summary: DiffSummary;
   changes: DiffChange[];
 }

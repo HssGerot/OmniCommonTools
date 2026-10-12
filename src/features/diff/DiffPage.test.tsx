@@ -10,6 +10,27 @@ import {
 } from "../preferences/storage";
 import DiffPage from "./DiffPage";
 
+const monaco = vi.hoisted(() => {
+  const originalEditor = {
+    revealLineInCenter: vi.fn(),
+    setPosition: vi.fn(),
+  };
+  const modifiedEditor = {
+    revealLineInCenter: vi.fn(),
+    setPosition: vi.fn(),
+  };
+
+  return {
+    modifiedEditor,
+    originalEditor,
+    props: vi.fn(),
+    instance: {
+      getModifiedEditor: () => modifiedEditor,
+      getOriginalEditor: () => originalEditor,
+    },
+  };
+});
+
 vi.mock("../../components/CodeEditor", () => ({
   CodeEditor: ({
     label,
@@ -34,13 +55,24 @@ vi.mock("../../components/CodeEditor", () => ({
 vi.mock("@monaco-editor/react", () => ({
   DiffEditor: ({
     modified,
+    onMount,
+    options,
     original,
-  }: ComponentProps<"div"> & { modified: string; original: string }) => (
-    <div aria-label="并排差异结果">
-      <pre>{original}</pre>
-      <pre>{modified}</pre>
-    </div>
-  ),
+  }: ComponentProps<"div"> & {
+    modified: string;
+    onMount?: (instance: typeof monaco.instance) => void;
+    options?: Record<string, unknown>;
+    original: string;
+  }) => {
+    monaco.props({ modified, options, original });
+    onMount?.(monaco.instance);
+    return (
+      <div aria-label="并排差异结果">
+        <pre>{original}</pre>
+        <pre>{modified}</pre>
+      </div>
+    );
+  },
 }));
 
 function createMemoryStorage(initial?: Record<string, string>) {
@@ -67,6 +99,15 @@ function renderDiffPage(storage = createMemoryStorage()) {
 
 beforeEach(() => {
   vi.restoreAllMocks();
+  monaco.modifiedEditor.revealLineInCenter.mockClear();
+  monaco.modifiedEditor.setPosition.mockClear();
+  monaco.originalEditor.revealLineInCenter.mockClear();
+  monaco.originalEditor.setPosition.mockClear();
+  monaco.props.mockClear();
+  Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+    configurable: true,
+    value: vi.fn(),
+  });
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
     value: vi.fn().mockReturnValue({
@@ -220,4 +261,142 @@ it("defaults narrow screens to an accessible unified result with text markers", 
   expect(result).toHaveTextContent("− 删除");
   expect(result).toHaveTextContent("+ 新增");
   expect(result).toHaveTextContent("修改");
+});
+
+it("uses the same ignore semantics in the summary and unified result", async () => {
+  const user = userEvent.setup();
+  renderDiffPage();
+
+  await user.click(screen.getByRole("checkbox", { name: "忽略空白" }));
+  await user.click(screen.getByRole("checkbox", { name: "忽略大小写" }));
+  await user.click(screen.getByRole("button", { name: "统一视图" }));
+  fireEvent.change(screen.getByLabelText("A 侧内容"), {
+    target: { value: " Alpha   Value \nold" },
+  });
+  fireEvent.change(screen.getByLabelText("B 侧内容"), {
+    target: { value: "alpha value\nnew" },
+  });
+  await user.click(screen.getByRole("button", { name: "开始对比" }));
+
+  expect(screen.getByText("发现 1 处差异")).toBeVisible();
+  const result = screen.getByRole("region", { name: "统一差异结果" });
+  expect(result).toHaveTextContent("alpha value");
+  expect(
+    Array.from(result.querySelectorAll("mark"), (mark) => mark.textContent),
+  ).toEqual(["old", "new"]);
+
+  await user.click(screen.getByRole("button", { name: "双栏视图" }));
+  expect(monaco.props).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      modified: "alpha value\nnew",
+      original: "alpha value\nold",
+    }),
+  );
+});
+
+it("configures Monaco to show default whitespace changes without collapsing side-by-side", async () => {
+  const user = userEvent.setup();
+  renderDiffPage();
+
+  fireEvent.change(screen.getByLabelText("A 侧内容"), {
+    target: { value: "value " },
+  });
+  fireEvent.change(screen.getByLabelText("B 侧内容"), {
+    target: { value: "value" },
+  });
+  await user.click(screen.getByRole("button", { name: "开始对比" }));
+
+  expect(screen.getByText("发现 1 处差异")).toBeVisible();
+  expect(monaco.props).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      options: expect.objectContaining({
+        ignoreTrimWhitespace: false,
+        renderSideBySide: true,
+        useInlineViewWhenSpaceIsLimited: false,
+      }),
+    }),
+  );
+});
+
+it("focuses and scrolls each unified change while navigation wraps", async () => {
+  const user = userEvent.setup();
+  const scrollIntoView = vi.mocked(HTMLElement.prototype.scrollIntoView);
+  renderDiffPage();
+
+  await user.click(screen.getByRole("button", { name: "统一视图" }));
+  fireEvent.change(screen.getByLabelText("A 侧内容"), {
+    target: { value: "old one\nsame\nold two" },
+  });
+  fireEvent.change(screen.getByLabelText("B 侧内容"), {
+    target: { value: "new one\nsame\nnew two" },
+  });
+  await user.click(screen.getByRole("button", { name: "开始对比" }));
+
+  const first = document.querySelector<HTMLElement>('[data-change-index="0"]');
+  const second = document.querySelector<HTMLElement>('[data-change-index="1"]');
+  expect(first).toHaveFocus();
+  expect(first).toHaveAttribute("aria-current", "true");
+
+  await user.click(screen.getByRole("button", { name: "下一处差异" }));
+  expect(second).toHaveFocus();
+  expect(second).toHaveAttribute("aria-current", "true");
+
+  await user.click(screen.getByRole("button", { name: "下一处差异" }));
+  expect(first).toHaveFocus();
+  expect(scrollIntoView).toHaveBeenCalledWith({ block: "center" });
+});
+
+it("navigates JSON array, repeated-key, and deletion changes by exact side and line", async () => {
+  const user = userEvent.setup();
+  renderDiffPage();
+  await user.click(screen.getByRole("button", { name: "JSON 模式" }));
+
+  fireEvent.change(screen.getByLabelText("A 侧内容"), {
+    target: {
+      value:
+        '{"gone":1,"items":[1,2],"left":{"id":1},"right":{"id":2}}',
+    },
+  });
+  fireEvent.change(screen.getByLabelText("B 侧内容"), {
+    target: {
+      value: '{"items":[1,2,3],"left":{"id":9},"right":{"id":3}}',
+    },
+  });
+  await user.click(screen.getByRole("button", { name: "开始对比" }));
+
+  expect(monaco.originalEditor.setPosition).toHaveBeenLastCalledWith({
+    lineNumber: 2,
+    column: 1,
+  });
+
+  await user.click(screen.getByRole("button", { name: "下一处差异" }));
+  expect(monaco.modifiedEditor.setPosition).toHaveBeenLastCalledWith({
+    lineNumber: 5,
+    column: 1,
+  });
+
+  await user.click(screen.getByRole("button", { name: "下一处差异" }));
+  expect(monaco.modifiedEditor.setPosition).toHaveBeenLastCalledWith({
+    lineNumber: 8,
+    column: 1,
+  });
+
+  await user.click(screen.getByRole("button", { name: "下一处差异" }));
+  expect(monaco.modifiedEditor.setPosition).toHaveBeenLastCalledWith({
+    lineNumber: 11,
+    column: 1,
+  });
+
+  await user.click(screen.getByRole("button", { name: "下一处差异" }));
+  expect(monaco.originalEditor.setPosition).toHaveBeenLastCalledWith({
+    lineNumber: 2,
+    column: 1,
+  });
+
+  await user.click(screen.getByRole("button", { name: "统一视图" }));
+  for (let index = 0; index < 4; index += 1) {
+    expect(
+      document.querySelector(`[data-change-index="${index}"]`),
+    ).toBeInTheDocument();
+  }
 });
