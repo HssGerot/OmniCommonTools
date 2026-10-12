@@ -60,6 +60,10 @@ export default function JsonFormatterPage({
   const sortKeys = preferences.settings.jsonSortKeys ?? false;
 
   useEffect(() => {
+    preferences.markRecent("json-formatter");
+  }, [preferences.markRecent]);
+
+  useEffect(() => {
     if (!input) {
       setError(null);
       setStatus("等待输入");
@@ -162,8 +166,9 @@ export default function JsonFormatterPage({
   return (
     <main className="json-tool-page" id="main-content">
       <ToolPageHeader
-        title="JSON 美化"
+        toolId="json-formatter"
         description="在浏览器本地格式化、压缩与校验 JSON，完整保留大整数文本。"
+        preferenceStore={preferenceStore}
         actions={
           <>
             <button
@@ -197,47 +202,6 @@ export default function JsonFormatterPage({
         }
       />
 
-      <section className="json-toolbar" aria-label="JSON 操作">
-        <div className="json-primary-actions">
-          <button className="primary-button" onClick={handleFormat} type="button">
-            <Braces aria-hidden="true" />
-            格式化
-          </button>
-          <button
-            className="secondary-button"
-            onClick={handleMinify}
-            type="button"
-          >
-            <Minimize2 aria-hidden="true" />
-            压缩
-          </button>
-        </div>
-        <div className="json-options">
-          <label>
-            <span>缩进</span>
-            <select
-              aria-label="缩进"
-              onChange={handleIndentChange}
-              value={String(indent)}
-            >
-              <option value="2">2 空格</option>
-              <option value="4">4 空格</option>
-              <option value="tab">Tab</option>
-            </select>
-          </label>
-          <label className="checkbox-label">
-            <input
-              checked={sortKeys}
-              onChange={(event) =>
-                preferences.setSetting("jsonSortKeys", event.target.checked)
-              }
-              type="checkbox"
-            />
-            排序对象键
-          </label>
-        </div>
-      </section>
-
       <section className="json-workspace">
         <CodeEditor
           ref={inputEditorRef}
@@ -245,6 +209,46 @@ export default function JsonFormatterPage({
           onChange={setInput}
           value={input}
         />
+        <section className="json-toolbar" aria-label="JSON 操作">
+          <div className="json-primary-actions">
+            <button className="primary-button" onClick={handleFormat} type="button">
+              <Braces aria-hidden="true" />
+              格式化
+            </button>
+            <button
+              className="secondary-button"
+              onClick={handleMinify}
+              type="button"
+            >
+              <Minimize2 aria-hidden="true" />
+              压缩
+            </button>
+          </div>
+          <div className="json-options">
+            <label>
+              <span>缩进</span>
+              <select
+                aria-label="缩进"
+                onChange={handleIndentChange}
+                value={String(indent)}
+              >
+                <option value="2">2 空格</option>
+                <option value="4">4 空格</option>
+                <option value="tab">Tab</option>
+              </select>
+            </label>
+            <label className="checkbox-label">
+              <input
+                checked={sortKeys}
+                onChange={(event) =>
+                  preferences.setSetting("jsonSortKeys", event.target.checked)
+                }
+                type="checkbox"
+              />
+              排序对象键
+            </label>
+          </div>
+        </section>
         <div className="json-output-pane">
           <div className="json-output-actions">
             <IconButton

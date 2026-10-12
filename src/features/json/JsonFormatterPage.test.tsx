@@ -1,6 +1,7 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { forwardRef, useImperativeHandle, useRef } from "react";
+import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import {
   createPreferenceStore,
@@ -54,7 +55,11 @@ function createMemoryStorage() {
 function renderJsonPage(storage = createMemoryStorage()) {
   const preferenceStore = createPreferenceStore(storage);
   return {
-    ...render(<JsonFormatterPage preferenceStore={preferenceStore} />),
+    ...render(
+      <MemoryRouter>
+        <JsonFormatterPage preferenceStore={preferenceStore} />
+      </MemoryRouter>,
+    ),
     storage,
   };
 }
@@ -65,6 +70,52 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
+});
+
+it("marks JSON formatter as recent when rendered directly", async () => {
+  const { storage } = renderJsonPage();
+
+  await waitFor(() => {
+    expect(JSON.parse(storage.getItem(STORAGE_KEY)!).recent).toEqual([
+      expect.objectContaining({ toolId: "json-formatter" }),
+    ]);
+  });
+});
+
+it("shows shared tool context and toggles the current tool favorite", async () => {
+  const user = userEvent.setup();
+  const { container, storage } = renderJsonPage();
+
+  expect(screen.getByRole("link", { name: "返回全部工具" })).toHaveAttribute(
+    "href",
+    "/",
+  );
+  expect(screen.getByText("本地处理")).toBeVisible();
+  expect(container.querySelector(".tool-page-icon svg")).toBeInTheDocument();
+
+  await user.click(screen.getByRole("button", { name: "收藏 JSON 美化" }));
+
+  expect(
+    screen.getByRole("button", { name: "取消收藏 JSON 美化" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(JSON.parse(storage.getItem(STORAGE_KEY)!).favorites).toEqual([
+    "json-formatter",
+  ]);
+});
+
+it("keeps the mobile DOM and keyboard order as input, actions, then result", () => {
+  renderJsonPage();
+
+  const input = screen.getByLabelText("JSON 输入");
+  const actions = screen.getByRole("region", { name: "JSON 操作" });
+  const output = screen.getByLabelText("JSON 结果");
+
+  expect(
+    input.compareDocumentPosition(actions) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
+  expect(
+    actions.compareDocumentPosition(output) & Node.DOCUMENT_POSITION_FOLLOWING,
+  ).toBeTruthy();
 });
 
 it("formats, copies, clears, and keeps the last successful output on error", async () => {
