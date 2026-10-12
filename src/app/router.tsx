@@ -18,9 +18,8 @@ function createPlaceholder(title: string, description: string) {
 
 const HomePage = lazy(() => import("../pages/HomePage"));
 const FavoritesPage = lazy(() => import("../pages/FavoritesPage"));
-const JsonFormatterPage = createPlaceholder(
-  "JSON 美化",
-  "格式化、校验并查看 JSON 数据。",
+const JsonFormatterPage = lazy(
+  () => import("../features/json/JsonFormatterPage"),
 );
 const TextJsonDiffPage = createPlaceholder(
   "文本 / JSON Diff",

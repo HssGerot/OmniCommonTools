@@ -26,6 +26,7 @@ export function usePreferences(store: PreferenceStore = preferenceStore) {
     ...preferences,
     clearPreferences: store.clear,
     markRecent: store.markRecent,
+    setSetting: store.setSetting,
     toggleFavorite: store.toggleFavorite,
   };
 }

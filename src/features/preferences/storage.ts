@@ -30,6 +30,10 @@ export interface PreferenceStore {
   subscribe(listener: () => void): () => void;
   toggleFavorite(toolId: ToolId): void;
   markRecent(toolId: ToolId, usedAt?: number): void;
+  setSetting<Key extends keyof PersistedPreferences["settings"]>(
+    key: Key,
+    value: PersistedPreferences["settings"][Key],
+  ): void;
   clear(): void;
 }
 
@@ -167,6 +171,12 @@ export function createPreferenceStore(storage: StorageLike): PreferenceStore {
         ...preferences.recent.filter((entry) => entry.toolId !== toolId),
       ].slice(0, 5);
       persist({ ...preferences, recent });
+    },
+    setSetting(key, value) {
+      persist({
+        ...preferences,
+        settings: { ...preferences.settings, [key]: value },
+      });
     },
     clear() {
       preferences = { ...DEFAULT_PREFERENCES, settings: {} };
