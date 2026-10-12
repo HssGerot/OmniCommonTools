@@ -26,6 +26,7 @@ import type { DiffResult, JsonFailure } from "./types";
 type DiffMode = "text" | "json";
 type DiffView = "side-by-side" | "unified";
 type Side = "A" | "B";
+type TextDiffOptions = Parameters<typeof compareText>[2];
 
 const TEXT_SAMPLE = {
   left: "server:\n  host: localhost\n  port: 3000\n  debug: false",
@@ -121,14 +122,12 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
     leftValue = left,
     rightValue = right,
     activeMode = mode,
+    textOptions: TextDiffOptions = { ignoreCase, ignoreWhitespace },
   ) {
     const next =
       activeMode === "json"
         ? compareJson(leftValue, rightValue)
-        : compareText(leftValue, rightValue, {
-            ignoreCase,
-            ignoreWhitespace,
-          });
+        : compareText(leftValue, rightValue, textOptions);
 
     if ("ok" in next) {
       setResult(null);
@@ -140,6 +139,21 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
     setResult(next);
     setError(null);
     setCurrentDifference(0);
+  }
+
+  function handleIgnoreOptions(nextOptions: TextDiffOptions) {
+    if (nextOptions.ignoreWhitespace !== ignoreWhitespace) {
+      preferences.setSetting(
+        "diffIgnoreWhitespace",
+        nextOptions.ignoreWhitespace,
+      );
+    }
+    if (nextOptions.ignoreCase !== ignoreCase) {
+      preferences.setSetting("diffIgnoreCase", nextOptions.ignoreCase);
+    }
+    if (mode === "text" && result) {
+      calculate(left, right, mode, nextOptions);
+    }
   }
 
   function updateInput(side: Side, value: string) {
@@ -297,10 +311,10 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
               <input
                 checked={ignoreWhitespace}
                 onChange={(event) =>
-                  preferences.setSetting(
-                    "diffIgnoreWhitespace",
-                    event.target.checked,
-                  )
+                  handleIgnoreOptions({
+                    ignoreCase,
+                    ignoreWhitespace: event.target.checked,
+                  })
                 }
                 type="checkbox"
               />
@@ -310,7 +324,10 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
               <input
                 checked={ignoreCase}
                 onChange={(event) =>
-                  preferences.setSetting("diffIgnoreCase", event.target.checked)
+                  handleIgnoreOptions({
+                    ignoreCase: event.target.checked,
+                    ignoreWhitespace,
+                  })
                 }
                 type="checkbox"
               />

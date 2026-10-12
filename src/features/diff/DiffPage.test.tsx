@@ -294,6 +294,52 @@ it("uses the same ignore semantics in the summary and unified result", async () 
   );
 });
 
+it.each([
+  {
+    checkbox: "忽略大小写",
+    left: "A\nold",
+    normalizedLeft: "a\nold",
+    normalizedRight: "a\nnew",
+    right: "a\nnew",
+  },
+  {
+    checkbox: "忽略空白",
+    left: "Alpha   Value\nold",
+    normalizedLeft: "Alpha Value\nold",
+    normalizedRight: "Alpha Value\nnew",
+    right: "Alpha Value\nnew",
+  },
+])(
+  "recomputes an existing result when toggling $checkbox",
+  async ({ checkbox, left, normalizedLeft, normalizedRight, right }) => {
+    const user = userEvent.setup();
+    renderDiffPage();
+
+    fireEvent.change(screen.getByLabelText("A 侧内容"), {
+      target: { value: left },
+    });
+    fireEvent.change(screen.getByLabelText("B 侧内容"), {
+      target: { value: right },
+    });
+    await user.click(screen.getByRole("button", { name: "开始对比" }));
+
+    expect(screen.getByText("发现 2 处差异")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "下一处差异" }));
+    expect(screen.getByText("2 / 2")).toBeVisible();
+
+    await user.click(screen.getByRole("checkbox", { name: checkbox }));
+
+    expect(screen.getByText("发现 1 处差异")).toBeVisible();
+    expect(screen.getByText("1 / 1")).toBeVisible();
+    expect(monaco.props).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        modified: normalizedRight,
+        original: normalizedLeft,
+      }),
+    );
+  },
+);
+
 it("configures Monaco to show default whitespace changes without collapsing side-by-side", async () => {
   const user = userEvent.setup();
   renderDiffPage();
