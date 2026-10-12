@@ -15,6 +15,7 @@ import {
 import { IconButton } from "../../components/IconButton";
 import { useToast } from "../../components/ToastRegion";
 import { ToolPageHeader } from "../../components/ToolPageHeader";
+import { copyText } from "../../utils/clipboard";
 import { downloadText, readTextFile } from "../../utils/files";
 import type { PreferenceStore } from "../preferences/storage";
 import { usePreferences } from "../preferences/usePreferences";
@@ -117,14 +118,14 @@ export default function JsonFormatterPage({
   }
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(output);
+    if (await copyText(output)) {
       setStatus("已复制结果");
       notify("已复制结果");
-    } catch {
-      setStatus("复制失败");
-      notify("复制失败");
+      return;
     }
+
+    setStatus("复制失败");
+    notify("复制失败");
   }
 
   function handleDownload() {
