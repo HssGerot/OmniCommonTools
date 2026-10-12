@@ -17,7 +17,7 @@ export type TimeSuccess = {
 };
 
 const LOCAL_DATE_TIME =
-  /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})\.(\d{3})$/;
+  /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})(?:\.(\d{3}))?$/;
 const ISO_WITH_OFFSET =
   /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d{1,9})?)?(?:Z|[+-]\d{2}:\d{2})$/;
 const INTEGER_TIMESTAMP = /^-?\d+$/;
@@ -126,7 +126,7 @@ function parseWallTime(value: string): WallTime | null {
     hour: Number(hour),
     minute: Number(minute),
     second: Number(second),
-    millisecond: Number(millisecond),
+    millisecond: Number(millisecond ?? "0"),
   };
   const validation = DateTime.fromObject(wallTime, { zone: "UTC" });
 
@@ -255,7 +255,7 @@ export function fromDateTime(
   const wallTime = parseWallTime(value);
   if (!wallTime) {
     return invalid(
-      "请输入 YYYY-MM-DD HH:mm:ss.SSS，或带显式偏移的 ISO 8601 时间。",
+      "请输入 YYYY-MM-DD HH:mm:ss[.SSS]，或带显式偏移的 ISO 8601 时间。",
     );
   }
 

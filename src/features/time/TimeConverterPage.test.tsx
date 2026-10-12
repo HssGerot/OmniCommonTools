@@ -121,6 +121,26 @@ it("shows a DST gap alert and lets the user select an overlap candidate", async 
   );
 });
 
+it("associates conversion errors only with the active input", () => {
+  renderTimePage();
+  const timestamp = screen.getByLabelText("时间戳");
+  const dateTime = screen.getByLabelText("日期时间");
+
+  fireEvent.change(timestamp, { target: { value: "invalid" } });
+  expect(timestamp).toHaveAttribute(
+    "aria-describedby",
+    "time-conversion-error",
+  );
+  expect(dateTime).toHaveAttribute("aria-describedby", "date-time-hint");
+
+  fireEvent.change(dateTime, { target: { value: "invalid" } });
+  expect(timestamp).not.toHaveAttribute("aria-describedby");
+  expect(dateTime).toHaveAttribute(
+    "aria-describedby",
+    "date-time-hint time-conversion-error",
+  );
+});
+
 it("persists only the selected time zone and timestamp unit, never inputs", async () => {
   const user = userEvent.setup();
   const { storage } = renderTimePage();

@@ -58,6 +58,14 @@ it("parses the local format strictly and accepts ISO 8601 only with an offset", 
   });
 });
 
+it("defaults omitted local milliseconds to zero", () => {
+  expect(fromDateTime("2026-10-12 09:30:45", "Asia/Shanghai")).toMatchObject({
+    ok: true,
+    epochMilliseconds: "1791768645000",
+    iso: "2026-10-12T01:30:45.000Z",
+  });
+});
+
 it("returns both overlap offsets and resolves the selected candidate", () => {
   const ambiguous = fromDateTime(
     "2026-11-01 01:30:00.000",

@@ -291,7 +291,11 @@ export default function TimeConverterPage({
           <label className="time-input-field">
             <span>时间戳</span>
             <input
-              aria-describedby={error ? "time-conversion-error" : undefined}
+              aria-describedby={
+                activeConverter === "timestamp" && error
+                  ? "time-conversion-error"
+                  : undefined
+              }
               aria-invalid={activeConverter === "timestamp" && Boolean(error)}
               inputMode="numeric"
               onChange={(event) => updateTimestamp(event.target.value)}
@@ -339,7 +343,11 @@ export default function TimeConverterPage({
           <label className="time-input-field">
             <span>日期时间</span>
             <input
-              aria-describedby="date-time-hint"
+              aria-describedby={
+                activeConverter === "dateTime" && error
+                  ? "date-time-hint time-conversion-error"
+                  : "date-time-hint"
+              }
               aria-invalid={activeConverter === "dateTime" && Boolean(error)}
               onChange={(event) => updateDateTime(event.target.value)}
               placeholder="YYYY-MM-DD HH:mm:ss.SSS"
