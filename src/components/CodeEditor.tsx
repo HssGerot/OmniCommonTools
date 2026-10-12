@@ -1,6 +1,7 @@
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import type { editor } from "monaco-editor";
+import "./configureMonaco";
 
 export interface CodeEditorHandle {
   focusPosition(line: number, column: number): void;
@@ -60,6 +61,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             renderValidationDecorations: "off",
             scrollBeyondLastLine: false,
             tabSize: 2,
+            tabFocusMode: true,
             wordWrap: "on",
           }}
           theme={

@@ -28,6 +28,7 @@ export interface StorageLike {
 export interface PreferenceStore {
   getSnapshot(): PersistedPreferences;
   subscribe(listener: () => void): () => void;
+  setTheme(theme: PersistedPreferences["theme"]): void;
   toggleFavorite(toolId: ToolId): void;
   markRecent(toolId: ToolId, usedAt?: number): void;
   setSetting<Key extends keyof PersistedPreferences["settings"]>(
@@ -158,6 +159,9 @@ export function createPreferenceStore(storage: StorageLike): PreferenceStore {
     subscribe(listener) {
       listeners.add(listener);
       return () => listeners.delete(listener);
+    },
+    setTheme(theme) {
+      persist({ ...preferences, theme });
     },
     toggleFavorite(toolId) {
       const favorites = preferences.favorites.includes(toolId)

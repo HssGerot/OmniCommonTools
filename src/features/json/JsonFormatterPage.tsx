@@ -13,6 +13,7 @@ import {
   type CodeEditorHandle,
 } from "../../components/CodeEditor";
 import { IconButton } from "../../components/IconButton";
+import { useToast } from "../../components/ToastRegion";
 import { ToolPageHeader } from "../../components/ToolPageHeader";
 import { downloadText, readTextFile } from "../../utils/files";
 import type { PreferenceStore } from "../preferences/storage";
@@ -50,6 +51,7 @@ export default function JsonFormatterPage({
   preferenceStore,
 }: JsonFormatterPageProps) {
   const preferences = usePreferences(preferenceStore);
+  const { notify } = useToast();
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [error, setError] = useState<PageError | null>(null);
@@ -118,14 +120,17 @@ export default function JsonFormatterPage({
     try {
       await navigator.clipboard.writeText(output);
       setStatus("已复制结果");
+      notify("已复制结果");
     } catch {
       setStatus("复制失败");
+      notify("复制失败");
     }
   }
 
   function handleDownload() {
     downloadText(output, "formatted.json");
     setStatus("已下载结果");
+    notify("已下载结果");
   }
 
   async function handleImport(event: ChangeEvent<HTMLInputElement>) {

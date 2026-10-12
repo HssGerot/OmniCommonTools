@@ -6,7 +6,7 @@ export const TOOLS: readonly ToolDefinition[] = [
     name: "JSON 美化",
     description: "格式化、校验并清晰查看 JSON 数据。",
     category: "format",
-    keywords: ["JSON", "格式化", "美化", "校验"],
+    keywords: ["JSON", "格式化", "美化", "校验", "大整数"],
     route: "/tools/json-formatter",
     order: 1,
   },

@@ -34,6 +34,19 @@ it("stores only approved preference fields", () => {
   });
 });
 
+it("persists an approved theme without changing tool settings", () => {
+  const memoryStorage = createMemoryStorage();
+  const store = createPreferenceStore(memoryStorage);
+
+  store.setSetting("jsonIndent", 4);
+  store.setTheme("dark");
+
+  expect(JSON.parse(memoryStorage.getItem(STORAGE_KEY)!)).toMatchObject({
+    settings: { jsonIndent: 4 },
+    theme: "dark",
+  });
+});
+
 it("discards unknown tool IDs and caps recent entries at five", () => {
   const memoryStorage = createMemoryStorage(
     JSON.stringify({

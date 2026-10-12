@@ -10,6 +10,10 @@ import {
 } from "../preferences/storage";
 import JsonFormatterPage from "./JsonFormatterPage";
 
+const codeEditor = vi.hoisted(() => ({
+  focusPosition: vi.fn(),
+}));
+
 vi.mock("../../components/CodeEditor", () => ({
   CodeEditor: forwardRef(function CodeEditor(
     {
@@ -27,7 +31,10 @@ vi.mock("../../components/CodeEditor", () => ({
   ) {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     useImperativeHandle(ref, () => ({
-      focusPosition: () => textareaRef.current?.focus(),
+      focusPosition: (line: number, column: number) => {
+        codeEditor.focusPosition(line, column);
+        textareaRef.current?.focus();
+      },
     }));
 
     return (
@@ -66,6 +73,7 @@ function renderJsonPage(storage = createMemoryStorage()) {
 
 beforeEach(() => {
   vi.restoreAllMocks();
+  codeEditor.focusPosition.mockClear();
 });
 
 afterEach(() => {
@@ -146,6 +154,7 @@ it("formats, copies, clears, and keeps the last successful output on error", asy
 
   await user.click(alert);
   expect(input).toHaveFocus();
+  expect(codeEditor.focusPosition).toHaveBeenCalledWith(1, 7);
 
   await user.click(screen.getByRole("button", { name: "清空" }));
   expect(input).toHaveValue("");

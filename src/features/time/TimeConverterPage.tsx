@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { IconButton } from "../../components/IconButton";
+import { useToast } from "../../components/ToastRegion";
 import { ToolPageHeader } from "../../components/ToolPageHeader";
 import type { PreferenceStore } from "../preferences/storage";
 import { usePreferences } from "../preferences/usePreferences";
@@ -98,6 +99,7 @@ export default function TimeConverterPage({
   preferenceStore,
 }: TimeConverterPageProps) {
   const preferences = usePreferences(preferenceStore);
+  const { notify } = useToast();
   const [zone, setZone] = useState(() =>
     defaultTimeZone(preferences.settings.timeZone),
   );
@@ -209,8 +211,10 @@ export default function TimeConverterPage({
     try {
       await navigator.clipboard.writeText(value);
       setStatus(`已复制${label}`);
+      notify(`已复制${label}`);
     } catch {
       setStatus("复制失败");
+      notify("复制失败");
     }
   }
 

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Outlet } from "react-router-dom";
 import { AppShell } from "../components/AppShell";
+import { RouteErrorBoundary } from "../components/ErrorBoundary";
 
 const HomePage = lazy(() => import("../pages/HomePage"));
 const FavoritesPage = lazy(() => import("../pages/FavoritesPage"));
@@ -34,6 +35,7 @@ function RootLayout() {
 export const router = createBrowserRouter([
   {
     element: <RootLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
       { index: true, element: <HomePage /> },
       { path: "favorites", element: <FavoritesPage /> },
