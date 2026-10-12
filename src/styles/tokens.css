@@ -1,0 +1,47 @@
+:root {
+  color-scheme: light;
+
+  --color-slate-50: oklch(98% 0.006 255);
+  --color-slate-100: oklch(95% 0.01 255);
+  --color-slate-200: oklch(89% 0.015 255);
+  --color-slate-500: oklch(52% 0.035 255);
+  --color-slate-700: oklch(34% 0.035 255);
+  --color-slate-900: oklch(20% 0.025 255);
+  --color-blue-400: oklch(70% 0.14 255);
+  --color-blue-600: oklch(55% 0.18 255);
+  --color-blue-700: oklch(47% 0.16 255);
+
+  --color-background: var(--color-slate-50);
+  --color-surface: oklch(100% 0 0);
+  --color-text: var(--color-slate-900);
+  --color-text-muted: var(--color-slate-500);
+  --color-border: var(--color-slate-200);
+  --color-accent: var(--color-blue-600);
+  --color-accent-strong: var(--color-blue-700);
+  --color-focus: var(--color-blue-600);
+  --shadow-topbar: 0 1px 0 var(--color-border);
+
+  --radius-small: 0.5rem;
+  --radius-medium: 0.75rem;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --content-width: 75rem;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-background: oklch(15% 0.015 255);
+  --color-surface: oklch(20% 0.018 255);
+  --color-text: oklch(94% 0.01 255);
+  --color-text-muted: oklch(72% 0.025 255);
+  --color-border: oklch(29% 0.025 255);
+  --color-accent: var(--color-blue-400);
+  --color-accent-strong: oklch(78% 0.11 255);
+  --color-focus: var(--color-blue-400);
+  --shadow-topbar: none;
+}
