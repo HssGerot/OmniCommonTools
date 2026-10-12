@@ -834,3 +834,360 @@ input:focus-visible {
     gap: var(--space-1);
   }
 }
+
+.diff-tool-page {
+  width: min(100% - 2rem, var(--content-width));
+  margin: 0 auto;
+  padding: var(--space-8) 0;
+}
+
+.diff-controls,
+.diff-action-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--color-border);
+  padding: var(--space-2);
+  background: var(--color-surface);
+}
+
+.diff-controls {
+  margin-top: var(--space-6);
+  border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+}
+
+.diff-segmented {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 2px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-small);
+  padding: 2px;
+  background: var(--color-background);
+}
+
+.diff-segmented button,
+.diff-navigation button {
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: calc(var(--radius-small) - 2px);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.diff-segmented button {
+  padding: 0 var(--space-3);
+}
+
+.diff-segmented button[aria-pressed="true"] {
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px color-mix(in oklch, var(--color-text) 10%, transparent);
+  color: var(--color-accent-strong);
+}
+
+.diff-ignore-options {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.diff-ignore-options .checkbox-label {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 650;
+}
+
+.diff-json-note {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.diff-view-switch {
+  margin-left: auto;
+}
+
+.diff-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-right: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.diff-input-pane {
+  position: relative;
+  min-width: 0;
+}
+
+.diff-input-pane:first-child {
+  border-right: 1px solid var(--color-border);
+}
+
+.diff-input-pane .code-editor {
+  min-height: clamp(17rem, 36vh, 26rem);
+}
+
+.diff-import-button {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: var(--space-1);
+  min-height: 2.25rem;
+  border-color: transparent;
+  padding: 0 var(--space-2);
+  background: transparent;
+}
+
+.diff-action-bar {
+  justify-content: space-between;
+  border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+}
+
+.diff-summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.diff-summary strong {
+  color: var(--color-text);
+}
+
+.diff-navigation {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.diff-navigation button {
+  display: inline-grid;
+  width: 2.75rem;
+  place-items: center;
+}
+
+.diff-navigation button:hover:not(:disabled) {
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.diff-navigation button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.diff-navigation svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.diff-navigation span {
+  min-width: 3.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.diff-error {
+  margin-top: var(--space-3);
+  border: 1px solid color-mix(in oklch, #c4322c 45%, var(--color-border));
+  border-radius: var(--radius-small);
+  padding: var(--space-3) var(--space-4);
+  background: color-mix(in oklch, #c4322c 8%, var(--color-surface));
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.diff-result {
+  min-height: clamp(20rem, 45vh, 34rem);
+  margin-top: var(--space-4);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  background: var(--color-surface);
+}
+
+.diff-result-unified {
+  overflow: auto;
+}
+
+.diff-legend {
+  display: flex;
+  gap: var(--space-4);
+  min-height: 2.75rem;
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.diff-unified-lines {
+  min-width: max-content;
+  padding: var(--space-2) 0;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.diff-line {
+  display: flex;
+  min-height: 1.75rem;
+  padding-right: var(--space-4);
+  white-space: pre;
+}
+
+.diff-line.is-removed {
+  background: color-mix(in oklch, #c4322c 10%, var(--color-surface));
+}
+
+.diff-line.is-added {
+  background: color-mix(in oklch, #16835b 10%, var(--color-surface));
+}
+
+.diff-line-marker {
+  display: inline-block;
+  width: 2.5rem;
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  font-weight: 800;
+  text-align: center;
+  user-select: none;
+}
+
+.diff-line code {
+  color: var(--color-text);
+  font: inherit;
+}
+
+.diff-line mark {
+  border-radius: 2px;
+  background: color-mix(in oklch, #e0a100 35%, transparent);
+  color: inherit;
+}
+
+.diff-change-list {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-2);
+  background: var(--color-border);
+  list-style: none;
+}
+
+.diff-change-list li {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.diff-change-list li[aria-current="true"] {
+  box-shadow: inset 3px 0 var(--color-accent);
+  color: var(--color-text);
+}
+
+.diff-change-list code {
+  overflow-wrap: anywhere;
+  color: inherit;
+}
+
+.diff-no-changes {
+  margin: 0;
+  padding: var(--space-8);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+@media (max-width: 56rem) {
+  .diff-controls {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .diff-view-switch {
+    margin-left: 0;
+  }
+
+  .diff-inputs {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .diff-input-pane:first-child {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .diff-input-pane .code-editor {
+    min-height: 15rem;
+  }
+
+  .diff-action-bar {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .diff-summary {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    padding: var(--space-1);
+  }
+
+}
+
+@media (max-width: 40rem) {
+  .diff-tool-page {
+    padding-top: var(--space-6);
+  }
+
+  .diff-segmented {
+    flex: 1 1 auto;
+  }
+
+  .diff-segmented button {
+    flex: 1 1 0;
+  }
+
+  .diff-ignore-options {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .diff-action-bar .primary-button {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .diff-navigation {
+    margin-left: auto;
+  }
+
+}
+
+@media (pointer: coarse) {
+  .diff-import-button {
+    min-height: 2.75rem;
+  }
+}

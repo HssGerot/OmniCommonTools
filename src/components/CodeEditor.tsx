@@ -11,10 +11,14 @@ interface CodeEditorProps {
   value: string;
   onChange?: (value: string) => void;
   readOnly?: boolean;
+  language?: "json" | "plaintext";
 }
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
-  function CodeEditor({ label, onChange, readOnly = false, value }, ref) {
+  function CodeEditor(
+    { label, language = "json", onChange, readOnly = false, value },
+    ref,
+  ) {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
     const handleMount: OnMount = (instance) => {
@@ -40,7 +44,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
         <div className="code-editor-label">{label}</div>
         <Editor
           height="100%"
-          language="json"
+          language={language}
           onChange={(nextValue) => onChange?.(nextValue ?? "")}
           onMount={handleMount}
           options={{

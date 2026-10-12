@@ -21,9 +21,8 @@ const FavoritesPage = lazy(() => import("../pages/FavoritesPage"));
 const JsonFormatterPage = lazy(
   () => import("../features/json/JsonFormatterPage"),
 );
-const TextJsonDiffPage = createPlaceholder(
-  "文本 / JSON Diff",
-  "并排比较文本或 JSON 内容之间的差异。",
+const TextJsonDiffPage = lazy(
+  () => import("../features/diff/DiffPage"),
 );
 const TimestampConverterPage = createPlaceholder(
   "时间戳转换",
