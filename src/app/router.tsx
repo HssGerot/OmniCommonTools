@@ -16,14 +16,8 @@ function createPlaceholder(title: string, description: string) {
   }));
 }
 
-const HomePage = createPlaceholder(
-  "全部工具",
-  "从一个入口使用常用的开发者工具。",
-);
-const FavoritesPage = createPlaceholder(
-  "收藏",
-  "你收藏的工具会集中显示在这里。",
-);
+const HomePage = lazy(() => import("../pages/HomePage"));
+const FavoritesPage = lazy(() => import("../pages/FavoritesPage"));
 const JsonFormatterPage = createPlaceholder(
   "JSON 美化",
   "格式化、校验并查看 JSON 数据。",
@@ -36,10 +30,7 @@ const TimestampConverterPage = createPlaceholder(
   "时间戳转换",
   "在时间戳、日期时间和时区之间转换。",
 );
-const AboutPage = createPlaceholder(
-  "关于",
-  "了解 Toolbox 及其提供的开发者工具。",
-);
+const AboutPage = lazy(() => import("../pages/AboutPage"));
 
 function RootLayout() {
   return (
