@@ -1,6 +1,23 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
-test.beforeEach(async ({ page }) => {
+async function replaceEditorText(
+  page: Page,
+  label: "A 侧内容" | "B 侧内容",
+  value: string,
+) {
+  const region = page.getByRole("region", { name: label });
+  const editor = region.getByRole("textbox", { name: label, exact: true });
+  await region.locator(".monaco-editor").click({
+    position: { x: 120, y: 80 },
+  });
+  await expect(editor).toBeFocused();
+  await page.keyboard.press("ControlOrMeta+A");
+  await page.evaluate((text) => navigator.clipboard.writeText(text), value);
+  await page.keyboard.press("ControlOrMeta+V");
+}
+
+test.beforeEach(async ({ context, page }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/tools/text-json-diff");
 });
 
@@ -26,10 +43,7 @@ test("compares text in a unified view with non-color markers", async ({
 test("view preference persists but compared input does not", async ({ page }) => {
   await page.getByRole("button", { name: "统一视图" }).click();
   const left = page.getByRole("region", { name: "A 侧内容" });
-  await left.locator(".monaco-editor").click({
-    position: { x: 120, y: 80 },
-  });
-  await page.keyboard.insertText("PRIVATE_DIFF_INPUT");
+  await replaceEditorText(page, "A 侧内容", "PRIVATE_DIFF_INPUT");
   await expect(left.locator(".view-lines")).toContainText(
     "PRIVATE_DIFF_INPUT",
   );

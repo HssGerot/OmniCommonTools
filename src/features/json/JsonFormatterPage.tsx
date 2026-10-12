@@ -165,8 +165,15 @@ export default function JsonFormatterPage({
   function focusError() {
     if (error?.line && error.column) {
       inputEditorRef.current?.focusPosition(error.line, error.column);
+      setStatus(`已定位到第 ${error.line} 行，第 ${error.column} 列`);
     }
   }
+
+  const errorText = error
+    ? error.line && error.column
+      ? `第 ${error.line} 行，第 ${error.column} 列：${error.message}`
+      : error.message
+    : "";
 
   return (
     <main className="json-tool-page" id="main-content">
@@ -277,12 +284,19 @@ export default function JsonFormatterPage({
 
       <footer className="json-status-bar">
         <div className="json-error-slot">
-          {error?.line && error.column ? (
-            <button onClick={focusError} role="alert" type="button">
-              第 {error.line} 行，第 {error.column} 列：{error.message}
-            </button>
-          ) : error ? (
-            <span role="alert">{error.message}</span>
+          {error ? (
+            <details className="json-error-details">
+              <summary>
+                <span role="alert" title={errorText}>
+                  {errorText}
+                </span>
+              </summary>
+              {error.line && error.column ? (
+                <button onClick={focusError} type="button">
+                  定位到错误
+                </button>
+              ) : null}
+            </details>
           ) : (
             <span aria-hidden="true">&nbsp;</span>
           )}

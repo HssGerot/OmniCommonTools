@@ -33,6 +33,51 @@ test("favorites, recent tools, theme, and settings persist", async ({ page }) =>
   await expect(page.getByLabel("缩进")).toHaveValue("4");
 });
 
+test("persisted and system theme changes update Monaco editors", async ({
+  page,
+}) => {
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "omni-common-tools.preferences",
+      JSON.stringify({
+        favorites: [],
+        recent: [],
+        settings: {},
+        theme: "dark",
+      }),
+    );
+  });
+  await page.goto("/tools/json-formatter");
+  await expect(page.locator(".monaco-editor").first()).toHaveClass(/vs-dark/);
+
+  await page.evaluate(() => {
+    localStorage.setItem(
+      "omni-common-tools.preferences",
+      JSON.stringify({
+        favorites: [],
+        recent: [],
+        settings: {},
+        theme: "system",
+      }),
+    );
+  });
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.reload();
+  await expect(page.locator(".monaco-editor").first()).toHaveClass(/vs/);
+  await expect(page.locator(".monaco-editor").first()).not.toHaveClass(/vs-dark/);
+
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator(".monaco-editor").first()).toHaveClass(/vs-dark/);
+
+  await page.goto("/tools/text-json-diff");
+  await page.getByRole("button", { name: "双栏视图" }).click();
+  await page.getByRole("button", { name: "载入示例" }).click();
+  await page.getByRole("button", { name: "开始对比" }).click();
+  await expect(page.locator(".diff-result .monaco-editor.vs-dark")).toHaveCount(
+    2,
+  );
+});
+
 test("mobile navigation opens from a compact menu", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload();

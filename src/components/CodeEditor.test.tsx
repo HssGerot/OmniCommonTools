@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { useRef } from "react";
 import { expect, it, vi } from "vitest";
 import { CodeEditor, type CodeEditorHandle } from "./CodeEditor";
+import { ResolvedThemeProvider } from "./ResolvedTheme";
 
 vi.mock("./configureMonaco", () => ({}));
 
@@ -11,17 +12,21 @@ const monaco = vi.hoisted(() => ({
   options: undefined as Record<string, unknown> | undefined,
   revealPositionInCenter: vi.fn(),
   setPosition: vi.fn(),
+  theme: undefined as string | undefined,
 }));
 
 vi.mock("@monaco-editor/react", () => ({
   default: ({
     onMount,
     options,
+    theme,
   }: {
     onMount?: (instance: typeof monaco) => void;
     options?: Record<string, unknown>;
+    theme?: string;
   }) => {
     monaco.options = options;
+    monaco.theme = theme;
     onMount?.(monaco);
     return <div>Monaco editor</div>;
   },
@@ -55,4 +60,16 @@ it("allows keyboard users to tab out of the editor", () => {
   render(<CodeEditor label="JSON 输入" value="" />);
 
   expect(monaco.options).toMatchObject({ tabFocusMode: true });
+});
+
+it("renders the resolved application theme instead of reading the DOM", () => {
+  document.documentElement.dataset.theme = "light";
+
+  render(
+    <ResolvedThemeProvider preference="dark">
+      <CodeEditor label="JSON 输入" value="" />
+    </ResolvedThemeProvider>,
+  );
+
+  expect(monaco.theme).toBe("vs-dark");
 });

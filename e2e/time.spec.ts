@@ -9,14 +9,22 @@ test("converts epoch zero across time zones and announces copy", async ({
   page,
 }) => {
   await page.getByLabel("时间戳", { exact: true }).fill("0");
-  await page.getByRole("radio", { name: "秒", exact: true }).check();
-  await expect(page.getByLabel("ISO 8601 结果")).toHaveValue(
+  const seconds = page.getByRole("radio", { name: "秒", exact: true });
+  await seconds.focus();
+  await page.keyboard.press("Space");
+  await expect(
+    page.getByRole("textbox", { name: "ISO 8601 结果", exact: true }),
+  ).toHaveValue(
     "1970-01-01T00:00:00.000Z",
   );
 
   await page.getByLabel("目标时区", { exact: true }).selectOption("Asia/Shanghai");
-  await expect(page.getByLabel("秒时间戳结果")).toHaveValue("0");
-  await expect(page.getByLabel("目标时区结果")).toHaveValue(
+  await expect(
+    page.getByRole("textbox", { name: "秒时间戳结果", exact: true }),
+  ).toHaveValue("0");
+  await expect(
+    page.getByRole("textbox", { name: "目标时区结果", exact: true }),
+  ).toHaveValue(
     "1970-01-01 08:00:00.000 GMT+8",
   );
 
@@ -26,7 +34,9 @@ test("converts epoch zero across time zones and announces copy", async ({
 
 test("time preferences persist but converter inputs do not", async ({ page }) => {
   await page.getByLabel("目标时区", { exact: true }).selectOption("Asia/Shanghai");
-  await page.getByRole("radio", { name: "毫秒" }).check();
+  const milliseconds = page.getByRole("radio", { name: "毫秒", exact: true });
+  await milliseconds.focus();
+  await page.keyboard.press("Space");
   await page.getByLabel("时间戳", { exact: true }).fill("1791768645123");
   await page.getByLabel("日期时间", { exact: true }).fill(
     "2026-10-12 09:30:45.123",

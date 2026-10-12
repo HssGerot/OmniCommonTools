@@ -152,9 +152,12 @@ it("formats, copies, clears, and keeps the last successful output on error", asy
   expect(alert).toHaveTextContent(/第 1 行/);
   expect((output as HTMLTextAreaElement).value).toContain("9007199254740993");
 
-  await user.click(alert);
+  await user.click(screen.getByText(/第 1 行，第 7 列/));
+  expect(screen.getByRole("button", { name: "定位到错误" })).toBeVisible();
+  await user.click(screen.getByRole("button", { name: "定位到错误" }));
   expect(input).toHaveFocus();
   expect(codeEditor.focusPosition).toHaveBeenCalledWith(1, 7);
+  expect(screen.getByText("已定位到第 1 行，第 7 列")).toBeVisible();
 
   await user.click(screen.getByRole("button", { name: "清空" }));
   expect(input).toHaveValue("");

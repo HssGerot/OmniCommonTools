@@ -93,7 +93,7 @@ input:focus-visible,
   gap: var(--space-2);
 }
 
-.mobile-menu-button {
+.icon-button.mobile-menu-button {
   display: none;
 }
 
@@ -548,7 +548,7 @@ input:focus-visible,
     align-items: center;
   }
 
-  .mobile-menu-button {
+  .icon-button.mobile-menu-button {
     display: inline-grid;
   }
 
@@ -838,8 +838,8 @@ input:focus-visible,
   overflow: hidden;
 }
 
-.json-error-slot button,
-.json-error-slot > span {
+.json-error-slot > span,
+.json-error-details summary span {
   display: block;
   max-width: 100%;
   overflow: hidden;
@@ -847,13 +847,33 @@ input:focus-visible,
   white-space: nowrap;
 }
 
-.json-error-slot button {
+.json-error-details {
+  min-width: 0;
+}
+
+.json-error-details summary {
+  min-width: 0;
+  color: var(--color-accent-strong);
+  cursor: pointer;
+}
+
+.json-error-details[open] summary span {
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.json-error-details button {
   border: 0;
-  padding: 0;
+  margin-top: var(--space-2);
+  padding: var(--space-1) 0;
   background: transparent;
   color: var(--color-accent-strong);
   cursor: pointer;
   font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .json-status-bar > span:last-child {

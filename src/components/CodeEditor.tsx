@@ -2,6 +2,7 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import type { editor } from "monaco-editor";
 import "./configureMonaco";
+import { useMonacoTheme } from "./ResolvedTheme";
 
 export interface CodeEditorHandle {
   focusPosition(line: number, column: number): void;
@@ -17,10 +18,17 @@ interface CodeEditorProps {
 
 export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
   function CodeEditor(
-    { label, language = "json", onChange, readOnly = false, value },
+    {
+      label,
+      language = "json",
+      onChange,
+      readOnly = false,
+      value,
+    },
     ref,
   ) {
     const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
+    const resolvedTheme = useMonacoTheme();
 
     const handleMount: OnMount = (instance) => {
       editorRef.current = instance;
@@ -64,11 +72,7 @@ export const CodeEditor = forwardRef<CodeEditorHandle, CodeEditorProps>(
             tabFocusMode: true,
             wordWrap: "on",
           }}
-          theme={
-            document.documentElement.dataset.theme === "dark"
-              ? "vs-dark"
-              : "light"
-          }
+          theme={resolvedTheme}
           value={value}
         />
       </section>

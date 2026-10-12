@@ -15,6 +15,7 @@ import {
   type ChangeEvent,
 } from "react";
 import { CodeEditor } from "../../components/CodeEditor";
+import { useMonacoTheme } from "../../components/ResolvedTheme";
 import { ToolPageHeader } from "../../components/ToolPageHeader";
 import { readTextFile } from "../../utils/files";
 import type { PreferenceStore } from "../preferences/storage";
@@ -80,6 +81,7 @@ function revealLineFor(
 
 export default function DiffPage({ preferenceStore }: DiffPageProps) {
   const preferences = usePreferences(preferenceStore);
+  const monacoTheme = useMonacoTheme();
   const [mode, setMode] = useState<DiffMode>("text");
   const [left, setLeft] = useState("");
   const [right, setRight] = useState("");
@@ -464,11 +466,7 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
                 useInlineViewWhenSpaceIsLimited: false,
               }}
               original={result.leftRender}
-              theme={
-                document.documentElement.dataset.theme === "dark"
-                  ? "vs-dark"
-                  : "light"
-              }
+              theme={monacoTheme}
             />
           </section>
         ) : (

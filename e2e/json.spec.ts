@@ -1,10 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 
 async function replaceEditorText(page: Page, value: string) {
-  await page
-    .getByRole("region", { name: "JSON 输入" })
-    .locator(".monaco-editor")
-    .click({ position: { x: 120, y: 80 } });
+  const region = page.getByRole("region", { name: "JSON 输入" });
+  const editor = region.getByRole("textbox", {
+    name: "JSON 输入",
+    exact: true,
+  });
+  await region.locator(".monaco-editor").click({ position: { x: 120, y: 80 } });
+  await expect(editor).toBeFocused();
   await page.keyboard.press("ControlOrMeta+A");
   await page.evaluate((text) => navigator.clipboard.writeText(text), value);
   await page.keyboard.press("ControlOrMeta+V");
@@ -43,15 +46,18 @@ test("reports and focuses the exact malformed JSON location", async ({ page }) =
 
   const error = page.locator(".json-error-slot [role=alert]");
   await expect(error).toContainText("第 2 行，第 1 列");
-  await error.click();
+  await page.getByText(/第 2 行，第 1 列/).click();
+  await page.getByRole("button", { name: "定位到错误" }).click();
   await expect(input).toBeFocused();
+  await expect(page.getByText("已定位到第 2 行，第 1 列")).toBeVisible();
 });
 
 test("editor content does not return after reload", async ({ page }) => {
   const input = page.getByRole("region", { name: "JSON 输入" });
-  await input.locator(".monaco-editor").click({
-    position: { x: 120, y: 80 },
-  });
+  await input.locator(".monaco-editor").click({ position: { x: 120, y: 80 } });
+  await expect(
+    input.getByRole("textbox", { name: "JSON 输入", exact: true }),
+  ).toBeFocused();
   await page.keyboard.insertText('{"PRIVATE_JSON_INPUT":true}');
   await expect(input.locator(".view-lines")).toContainText(
     "PRIVATE_JSON_INPUT",
@@ -90,4 +96,8 @@ test("long mobile errors stay within the status bar and use ellipsis", async ({
   expect(layout.whiteSpace).toBe("nowrap");
   expect(layout.scrollWidth).toBeGreaterThan(layout.clientWidth);
   expect(layout.right).toBeLessThanOrEqual(390);
+
+  await page.getByText(/第 1 行，第 101 列/).click();
+  await expect(error).toHaveCSS("white-space", "normal");
+  await expect(error).toHaveAttribute("title", /.+/);
 });
