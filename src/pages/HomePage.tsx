@@ -35,9 +35,12 @@ export function HomePage() {
   return (
     <main className="catalog-page" id="main-content">
       <header className="catalog-heading">
-        <p className="page-eyebrow">Toolbox</p>
-        <h1>开发工具</h1>
-        <p>搜索并打开常用工具，所有内容都在本地处理。</p>
+        <p className="page-eyebrow">FeHelper</p>
+        <h1>开发者在线工具箱</h1>
+        <p>
+          提供 JSON 格式化与校验、文本和 JSON 差异对比、Unix
+          时间戳转换等常用开发工具。所有输入均在浏览器本地处理。
+        </p>
       </header>
 
       <section className="catalog-controls" aria-label="筛选工具">
