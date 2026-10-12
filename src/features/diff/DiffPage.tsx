@@ -190,6 +190,21 @@ export default function DiffPage({ preferenceStore }: DiffPageProps) {
     setCurrentDifference(0);
   }
 
+  useEffect(() => {
+    if (!left || !right) {
+      setResult(null);
+      setError(null);
+      setCurrentDifference(0);
+      return;
+    }
+
+    const timeout = window.setTimeout(() => {
+      calculate(left, right, mode, { ignoreCase, ignoreWhitespace });
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [left, right, mode, ignoreCase, ignoreWhitespace]);
+
   function handleIgnoreOptions(nextOptions: TextDiffOptions) {
     if (nextOptions.ignoreWhitespace !== ignoreWhitespace) {
       preferences.setSetting(

@@ -199,6 +199,46 @@ it("adds side-specific line highlight decorations to changed input rows", async 
   );
 });
 
+it("updates side-by-side input highlights while typing without pressing compare", async () => {
+  renderDiffPage();
+
+  fireEvent.change(screen.getByLabelText("A 侧内容"), {
+    target: { value: "same\nold" },
+  });
+  fireEvent.change(screen.getByLabelText("B 侧内容"), {
+    target: { value: "same\nnew" },
+  });
+
+  await waitFor(() => {
+    expect(screen.getByText("发现 1 处差异")).toBeVisible();
+  });
+
+  const calls = codeEditors.props.mock.calls.map(([props]) => props);
+  const leftProps = [...calls]
+    .reverse()
+    .find((props) => props.label === "A 侧内容");
+  const rightProps = [...calls]
+    .reverse()
+    .find((props) => props.label === "B 侧内容");
+
+  expect(leftProps.decorations).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        lineNumber: 2,
+        className: "diff-input-line-modified",
+      }),
+    ]),
+  );
+  expect(rightProps.decorations).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        lineNumber: 2,
+        className: "diff-input-line-modified",
+      }),
+    ]),
+  );
+});
+
 it("marks Diff as recent and renders the shared tool context", async () => {
   const { container, storage } = renderDiffPage();
 
